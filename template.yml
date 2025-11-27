@@ -1,4 +1,101 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
+Description: Sam Template for Leave Management project
+
+Globals:
+  Function:
+    Timeout: 3
+    Runtime: nodejs22.x
+    Architectures:
+      - arm64
+    LoggingConfig:
+      LogFormat: JSON
 
 Resources:
+  # Leave approval lambda function
+  LeaveApprovalLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda-functions/LeaveApproval
+      Handler: app.lambdaHandler
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - app.ts
+
+  # Leave approval validator lambda function
+  LeaveApprovalValidatorLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda-functions/LeaveApprovalValidator
+      Handler: app.lambdaHandler
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - app.ts
+
+  MyStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: step-functions/leave-approval-sm.asl.json
+      DefinitionSubstitutions:
+        LeaveApprovalLambdaArn: !GetAtt LeaveApprovalLambda.Arn
+        LeaveApprovalValidatorLambdaArn: !GetAtt LeaveApprovalValidatorLambda.Arn
+      Policies:
+        - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
+        - LambdaInvokePolicy:
+            FunctionName: !Ref LeaveApprovalLambda
+        - LambdaInvokePolicy:
+            FunctionName: !Ref LeaveApprovalValidatorLambda
+
+  # Auth lambda function
+  AuthLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda-functions/Auth
+      Handler: app.lambdaHandler
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          secret: "somesecret"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - app.ts
+
+  # Api Gateway http api
+  MyApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: MyLambdaAuth
+        Authorizers:
+          MyLambdaAuth:
+            FunctionPayloadType: TOKEN
+            FunctionArn: !GetAtt AuthLambda.Arn
+            AuthorizerPayloadFormatVersion: 2.0
+            Identity:
+              Header: Authorization
+    Routes:
+      - Path: /leave-approval
+        Method: post
+        Target: !Sub "states:StartExecution:${MyStateMachine}"
+
+Outputs:
+  LeaveApprovalApi:
+    Description: API Gateway endpoint URL for Prod stage for getting leave approval api
+    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval"
