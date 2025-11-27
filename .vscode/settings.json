@@ -1,0 +1,17 @@
+{
+    "cSpell.words": ["Onboarded", "ONLEAVE"],
+    "emmet.preferences": {},
+    "yaml.customTags": [
+      "!Equals sequence",
+      "!FindInMap sequence",
+      "!GetAtt",
+      "!GetAZs",
+      "!ImportValue",
+      "!Join sequence",
+      "!Ref",
+      "!Select sequence",
+      "!Split sequence",
+      "!Sub"
+    ]
+  }
+  
