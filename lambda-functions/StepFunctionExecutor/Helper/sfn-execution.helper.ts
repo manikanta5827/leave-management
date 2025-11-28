@@ -2,7 +2,7 @@ import {
   StartExecutionCommand,
   StartExecutionCommandOutput,
 } from "@aws-sdk/client-sfn";
-import { sfnClient } from "../Config/sfn-client.config";
+import { sfnClient } from "../Config/stepfunction.config";
 
 export const startStepFunctionExecution = async (
   stateMachineArn: string,
