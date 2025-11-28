@@ -17,7 +17,7 @@ export const handler = async (event: {
     PROJECT_EMAIL,
     userEmail,
     `Leave Approval Status`,
-    `Leave approval is Rejected, Bettwe luck next Time..:)`
+    `Leave approval is Rejected, Better luck next Time..:)`
   );
   return {};
 };
