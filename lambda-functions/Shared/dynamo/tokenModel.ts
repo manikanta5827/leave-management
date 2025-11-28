@@ -1,4 +1,4 @@
-import dynamoose from "dynamoose";
+import dynamoose from "./client";
 
 const TokenSchema = new dynamoose.Schema({
   requestId: {
