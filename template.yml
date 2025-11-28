@@ -117,9 +117,12 @@ Resources:
             Action:
               - states:StartExecution
             Resource: !GetAtt MyStateMachine.Arn
-      Environment:
-        Variables:
-          STATE_MACHINE_ARN: !GetAtt MyStateMachine.Arn
+        - Statement:
+            Effect: Allow
+            Action:
+              - states:SendTaskSuccess
+              - states:SendTaskFailure
+            Resource: "*"
       Events:
         StepFunctionTriggerApi:
           Type: Api
@@ -192,7 +195,6 @@ Resources:
             FunctionName: !Ref LeaveApprovalLambda
         - LambdaInvokePolicy:
             FunctionName: !Ref LeaveApprovalValidatorLambda
-
 
 Outputs:
   LeaveApprovalApi:
