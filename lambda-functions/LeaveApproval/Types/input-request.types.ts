@@ -4,7 +4,7 @@ export interface InputPayload {
     apiUrl: string;
     email: string;
     noOfDays: number;
-    userName: string;
+    username: string;
     reason: string;
   };
   Context: {

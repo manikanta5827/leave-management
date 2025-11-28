@@ -13,7 +13,7 @@ export const handler = async (event: InputPayload): Promise<{}> => {
   const apiUrl = event.Payload.apiUrl;
   const userEmail = event.Payload.email;
   const noOfDays = event.Payload.noOfDays;
-  const userName = event.Payload.userName;
+  const username = event.Payload.username;
   const reason = event.Payload.reason;
   const requestId = event.Context.Execution.Id;
 
@@ -22,8 +22,11 @@ export const handler = async (event: InputPayload): Promise<{}> => {
     token: token,
     userEmail: userEmail,
     noOfDays: noOfDays,
-    userName: userName,
+    username: username,
     reason: reason,
+    status: "PENDING",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
 
   // send email to admin with request id in url, so we can fetch the token back
@@ -31,8 +34,9 @@ export const handler = async (event: InputPayload): Promise<{}> => {
     PROJECT_EMAIL,
     ADMIN_EMAIL,
     `user leave request`,
-    `user ${userName} is requesting for ${noOfDays} days of leave
-     if you want to approve click on this link ${apiUrl}/${requestId} or if you want to reject click on this link ${apiUrl}/${requestId}`
+    `user ${username} is requesting for ${noOfDays} days of leave
+    if you want to approve click on this link ${apiUrl}?requestId=${requestId} or
+    if you want to reject click on this link ${apiUrl}?requestId=${requestId}`
   );
   return {};
 };

@@ -7,6 +7,7 @@ export async function sendEmail(
   subject: string,
   body: string
 ): Promise<void> {
+  console.log(`sender:: ${sender}, receiver:: ${receiver}`)
   const params = {
     Source: sender,
     Destination: {
