@@ -10,7 +10,8 @@
         "FunctionName": "${LeaveApprovalLambdaArn}",
         "Payload": {
           "TaskToken": "{% $states.context.Task.Token %}",
-          "Payload": "{% $states.input %}"
+          "Payload": "{% $states.input %}",
+          "Context": "{% $states.context %}"
         }
       },
       "TimeoutSeconds": 60,
