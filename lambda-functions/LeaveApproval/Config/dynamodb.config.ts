@@ -9,7 +9,10 @@ const TokenSchema = new dynamoose.Schema({
   userEmail: String,
   noOfDays: Number,
   username: String,
-  reason: String
+  reason: String,
+  status: String,
+  createdAt: String,
+  updatedAt: String,
 });
 
 const TOKEN_TABLE = process.env.TOKEN_TABLE;
