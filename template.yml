@@ -4,7 +4,6 @@ Description: Sam Template for Leave Management project
 
 Globals:
   Function:
-    Timeout: 3
     Runtime: nodejs22.x
     Architectures:
       - arm64
@@ -25,6 +24,7 @@ Resources:
     Properties:
       CodeUri: lambda-functions/Authorizer
       Handler: app.handler
+      Timeout: 3
       Policies:
         - AWSLambdaBasicExecutionRole
       Environment:
@@ -45,6 +45,7 @@ Resources:
     Properties:
       CodeUri: lambda-functions/StepFunctionExecutor
       Handler: app.handler
+      Timeout: 3
       Role: !GetAtt StepFunctionTriggerLambdaRole.Arn
       Environment:
         Variables:
@@ -71,10 +72,18 @@ Resources:
     Properties:
       CodeUri: lambda-functions/LeaveApproval
       Handler: app.handler
-      Policies: 
-       - AWSLambdaBasicExecutionRole
-       - DynamoDBCrudPolicy:
+      Timeout: 7
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
             TableName: !Ref TokenTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:sendEmail
+                - ses:SendRawEmail
+              Resource: "*"
+
       Environment:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
@@ -93,6 +102,7 @@ Resources:
     Properties:
       CodeUri: lambda-functions/LeaveApprovalValidator
       Handler: app.handler
+      Timeout: 5
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
