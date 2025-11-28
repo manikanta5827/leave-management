@@ -13,6 +13,7 @@
           "Payload": "{% $states.input %}"
         }
       },
+      "TimeoutSeconds": 60,
       "Retry": [
         {
           "ErrorEquals": [
