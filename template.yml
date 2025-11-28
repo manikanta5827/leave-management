@@ -11,10 +11,14 @@ Globals:
       LogFormat: JSON
 
 Parameters:
-  RetentionInDays:
-    Type: Number
-    Description: No of days the logs should present in cloudwatch
-    Default: 7
+  AdminEmail:
+    Type: String
+    Description: Admin email to send leave approval
+    Default: postbox5827@gmail.com
+  ProjectEmail:
+    Type: String
+    Description: Project email to send for all requests
+    Default: thummurimanikanta7@gmail.com
 
 Resources:
   # LAMBDA FUNCTIONS
@@ -94,6 +98,8 @@ Resources:
       Environment:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
+          ADMIN_EMAIL: !Ref AdminEmail
+          PROJECT_EMAIL: !Ref ProjectEmail
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -146,13 +152,35 @@ Resources:
         EntryPoints:
           - app.ts
 
-  # Leave approval validator lambda function
-  LeaveApprovalValidatorLambda:
+  # Success Leave approval lambda function
+  SuccessLeaveApprovalLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/LeaveApprovalValidator
+      CodeUri: lambda-functions/SuccessLeaveApproval
       Handler: app.handler
       Timeout: 5
+    Environment:
+      Variables:
+        PROJECT_EMAIL: !Ref ProjectEmail
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - app.ts
+
+  # Success Leave approval lambda function
+  FailureLeaveApprovalLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda-functions/FailureLeaveApproval
+      Handler: app.handler
+      Timeout: 5
+    Environment:
+      Variables:
+        PROJECT_EMAIL: !Ref ProjectEmail
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -196,17 +224,17 @@ Resources:
       DefinitionUri: step-functions/leave-approval-sm.asl.json
       DefinitionSubstitutions:
         LeaveApprovalLambdaArn: !GetAtt LeaveApprovalLambda.Arn
-        LeaveApprovalValidatorLambdaArn: !GetAtt LeaveApprovalValidatorLambda.Arn
+        SuccessLeaveApprovalLambdaArn: !GetAtt SuccessLeaveApprovalLambda.Arn
+        FailureLeaveApprovalLambdaArn: !GetAtt FailureLeaveApprovalLambda.Arn
       Policies:
         - LambdaInvokePolicy:
             FunctionName: !Ref LeaveApprovalLambda
         - LambdaInvokePolicy:
-            FunctionName: !Ref LeaveApprovalValidatorLambda
+            FunctionName: !Ref SuccessLeaveApprovalLambda
+        - LambdaInvokePolicy:
+            FunctionName: !Ref FailureLeaveApprovalLambda
 
 Outputs:
   LeaveApprovalApi:
     Description: API Gateway endpoint URL for Prod stage for getting leave approval api
     Value: !Sub "https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval"
-  LeaveResponseApi:
-    Description: API Gateway endpoint URL for Prod stage for getting leave response api
-    Value: !Sub "https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-response"
