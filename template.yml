@@ -42,6 +42,7 @@ Resources:
         EntryPoints:
           - app.ts
 
+  # my step function
   MyStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -55,6 +56,12 @@ Resources:
             FunctionName: !Ref LeaveApprovalLambda
         - LambdaInvokePolicy:
             FunctionName: !Ref LeaveApprovalValidatorLambda
+      Logging:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt StepFunctionsLogGroup.Arn
 
   # Auth lambda function
   AuthLambda:
@@ -81,6 +88,17 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: Prod
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+        Format: |
+          {
+            "requestId":"$context.requestId",
+            "ip":"$context.identity.sourceIp",
+            "requestTime":"$context.requestTime",
+            "httpMethod":"$context.httpMethod",
+            "routeKey":"$context.routeKey",
+            "status":"$context.status"
+          }
       Auth:
         DefaultAuthorizer: MyLambdaAuth
         Authorizers:
@@ -90,10 +108,61 @@ Resources:
             AuthorizerPayloadFormatVersion: 2.0
             Identity:
               Header: Authorization
-    Routes:
-      - Path: /leave-approval
-        Method: post
-        Target: !Sub "states:StartExecution:${MyStateMachine}"
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title: !Ref AWS::StackName
+          version: "1.0"
+        paths:
+          /leave-approval:
+            post:
+              summary: "Start Leave Approval"
+              security:
+                - MyLambdaAuth: []
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                integrationSubtype: "StepFunctions-StartExecution"
+                credentials: !GetAtt ApiGatewaySfnRole.Arn
+                requestParameters:
+                  StateMachineArn: !Ref MyStateMachine
+                payloadFormatVersion: "1.0"
+              responses:
+                "200":
+                  description: "Execution Started"
+
+  ApiGatewaySfnRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "apigateway.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "ApiGatewaySfnPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "states:StartExecution"
+                Resource: !Ref MyStateMachine
+
+  # log groups
+  # step function log group to see logs
+  StepFunctionsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/stepfunctions/${MyStateMachine}
+      RetentionInDays: 14
+
+  # api gateway log groups
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${MyApi}
+      RetentionInDays: 14
 
 Outputs:
   LeaveApprovalApi:
