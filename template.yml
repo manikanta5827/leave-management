@@ -23,13 +23,39 @@ Resources:
   AuthLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/Auth
-      Handler: app.lambdaHandler
+      CodeUri: lambda-functions/Authorizer
+      Handler: app.handler
       Policies:
         - AWSLambdaBasicExecutionRole
       Environment:
         Variables:
-          secret: "somesecret"
+          SECRET: "somesecret"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - app.ts
+
+  # Step function trigger lambda
+  StepFunctionTriggerLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda-functions/StepFunctionExecutor
+      Handler: app.handler
+      Role: !GetAtt StepFunctionTriggerLambdaRole.Arn
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !GetAtt MyStateMachine.Arn
+      Events:
+        StepFunctionTriggerApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyRestApi
+            Path: /leave-approval
+            Method: post
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -44,7 +70,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda-functions/LeaveApproval
-      Handler: app.lambdaHandler
+      Handler: app.handler
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -59,7 +85,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda-functions/LeaveApprovalValidator
-      Handler: app.lambdaHandler
+      Handler: app.handler
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -70,51 +96,17 @@ Resources:
           - app.ts
 
   # Api Gateway http api
-  MyApi:
-    Type: AWS::Serverless::HttpApi
+  MyRestApi:
+    Type: AWS::Serverless::Api
     Properties:
       StageName: Prod
-      AccessLogSettings:
-        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-        Format: |
-          {
-            "requestId":"$context.requestId",
-            "ip":"$context.identity.sourceIp",
-            "requestTime":"$context.requestTime",
-            "httpMethod":"$context.httpMethod",
-            "routeKey":"$context.routeKey",
-            "status":"$context.status"
-          }
       Auth:
         DefaultAuthorizer: MyLambdaAuth
         Authorizers:
           MyLambdaAuth:
-            FunctionPayloadType: TOKEN
             FunctionArn: !GetAtt AuthLambda.Arn
-            AuthorizerPayloadFormatVersion: 2.0
             Identity:
-              Header: Authorization
-      DefinitionBody:
-        openapi: "3.0.1"
-        info:
-          title: !Ref AWS::StackName
-          version: "1.0"
-        paths:
-          /leave-approval:
-            post:
-              summary: "Start Leave Approval"
-              security:
-                - MyLambdaAuth: []
-              x-amazon-apigateway-integration:
-                type: "aws_proxy"
-                integrationSubtype: "StepFunctions-StartExecution"
-                credentials: !GetAtt ApiGatewaySfnRole.Arn
-                requestParameters:
-                  StateMachineArn: !GetAtt MyStateMachine.Arn
-                payloadFormatVersion: "1.0"
-              responses:
-                "200":
-                  description: "Execution Started"
+              ReauthorizeEvery: 0
 
   # Step function
   MyStateMachine:
@@ -130,11 +122,11 @@ Resources:
         IncludeExecutionData: true
         Destinations:
           - CloudWatchLogsLogGroup:
-              LogGroupArn: !Sub "${StepFunctionsLogGroup.Arn}:*"
+              LogGroupArn: !GetAtt StepFunctionsLogGroup.Arn
 
   # ROLES
-  # api gateway role to access step function
-  ApiGatewaySfnRole:
+  # step function trigger lambda role to access step function
+  StepFunctionTriggerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -142,15 +134,18 @@ Resources:
         Statement:
           - Effect: "Allow"
             Principal:
-              Service: "apigateway.amazonaws.com"
+              Service: "lambda.amazonaws.com"
             Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: "ApiGatewaySfnPolicy"
+        - PolicyName: "StepFunctionInvokePolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: "Allow"
-                Action: "states:StartExecution"
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
                 Resource: !GetAtt MyStateMachine.Arn
 
   # step function role to access lambda, cloudwatch
@@ -169,22 +164,30 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              # lambda policy
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
                 Resource:
                   - !GetAtt LeaveApprovalLambda.Arn
                   - !GetAtt LeaveApprovalValidatorLambda.Arn
-
+              # cloudwatch policy
               - Effect: Allow
                 Action:
+                  - logs:CreateLogDelivery
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
+                  - logs:PutResourcePolicy
+                  - logs:DescribeResourcePolicies
+                  - logs:DescribeLogGroups
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - logs:DescribeLogGroups
                   - logs:DescribeLogStreams
                 Resource: "*"
-  
+
   # LOG GROUPS
   # step function log group to see logs
   StepFunctionsLogGroup:
@@ -203,4 +206,4 @@ Resources:
 Outputs:
   LeaveApprovalApi:
     Description: API Gateway endpoint URL for Prod stage for getting leave approval api
-    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval"
+    Value: !Sub "https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval"
