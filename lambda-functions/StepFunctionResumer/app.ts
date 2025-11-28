@@ -20,7 +20,6 @@ export const handler = async (
     const token = data.token;
     const userEmail = data.userEmail;
 
-    console.log("status:: ", status);
     if (status == "accept") {
       const command = new SendTaskSuccessCommand({
         taskToken: token,
@@ -45,7 +44,6 @@ export const handler = async (
 
       await sfnClient.send(command);
     }
-
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -55,6 +53,18 @@ export const handler = async (
     };
   } catch (error) {
     console.log(error);
+    const errorName =
+      error instanceof Error ? error.name : "Something went wrong";
+
+    if (errorName === "TaskTimedOut") {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          message: "Leave Task doesn't exist or expired",
+          time: new Date().toISOString(),
+        }),
+      };
+    }
     return {
       statusCode: 500,
       body: JSON.stringify({
