@@ -2,8 +2,11 @@ import Token from "../Shared/dynamo/tokenModel";
 import { sendEmail } from "../Shared/ses/email-sender.helper";
 import { InputPayload } from "./Types/input-request.types";
 
-const ADMIN_EMAIL = "postbox5827@gmail.com";
-const PROJECT_EMAIL = "thummurimanikanta7@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const PROJECT_EMAIL = process.env.PROJECT_EMAIL;
+
+if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL is not passes in env");
+if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passes in env");
 export const handler = async (event: InputPayload): Promise<{}> => {
   /* 
     store the token in db so that when admin accept responds back,
@@ -38,5 +41,7 @@ export const handler = async (event: InputPayload): Promise<{}> => {
     if you want to approve click on this link ${apiUrl}/leave-response?requestId=${requestId}&status=accept or
     if you want to reject click on this link ${apiUrl}/leave-response?requestId=${requestId}&status=reject `
   );
-  return {};
+  return {
+    status: "success",
+  };
 };
