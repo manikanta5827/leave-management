@@ -1,5 +1,5 @@
-import Token from "./Config/dynamodb.config";
-import { sendEmail } from "./Helper/email-sender.helper";
+import Token from "../Shared/dynamo/tokenModel";
+import { sendEmail } from "../Shared/ses/email-sender.helper";
 import { InputPayload } from "./Types/input-request.types";
 
 const ADMIN_EMAIL = "postbox5827@gmail.com";
