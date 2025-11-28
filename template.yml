@@ -11,7 +11,34 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 
+Parameters:
+  RetentionInDays:
+    Type: Number
+    Description: No of days the logs should present in cloudwatch
+    Default: 7
+
 Resources:
+  # LAMBDA FUNCTIONS
+  # Auth lambda function
+  AuthLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda-functions/Auth
+      Handler: app.lambdaHandler
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          secret: "somesecret"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: true
+        EntryPoints:
+          - app.ts
+
   # Leave approval lambda function
   LeaveApprovalLambda:
     Type: AWS::Serverless::Function
@@ -33,47 +60,6 @@ Resources:
     Properties:
       CodeUri: lambda-functions/LeaveApprovalValidator
       Handler: app.lambdaHandler
-    Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: false
-        Target: es2020
-        Sourcemap: true
-        EntryPoints:
-          - app.ts
-
-  # my step function
-  MyStateMachine:
-    Type: AWS::Serverless::StateMachine
-    Properties:
-      DefinitionUri: step-functions/leave-approval-sm.asl.json
-      DefinitionSubstitutions:
-        LeaveApprovalLambdaArn: !GetAtt LeaveApprovalLambda.Arn
-        LeaveApprovalValidatorLambdaArn: !GetAtt LeaveApprovalValidatorLambda.Arn
-      Policies:
-        - arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess
-        - LambdaInvokePolicy:
-            FunctionName: !Ref LeaveApprovalLambda
-        - LambdaInvokePolicy:
-            FunctionName: !Ref LeaveApprovalValidatorLambda
-      Logging:
-        Level: ALL
-        IncludeExecutionData: true
-        Destinations:
-          - CloudWatchLogsLogGroup:
-              LogGroupArn: !GetAtt StepFunctionsLogGroup.Arn
-
-  # Auth lambda function
-  AuthLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: lambda-functions/Auth
-      Handler: app.lambdaHandler
-      Policies:
-        - AWSLambdaBasicExecutionRole
-      Environment:
-        Variables:
-          secret: "somesecret"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -124,12 +110,30 @@ Resources:
                 integrationSubtype: "StepFunctions-StartExecution"
                 credentials: !GetAtt ApiGatewaySfnRole.Arn
                 requestParameters:
-                  StateMachineArn: !Ref MyStateMachine
+                  StateMachineArn: !GetAtt MyStateMachine.Arn
                 payloadFormatVersion: "1.0"
               responses:
                 "200":
                   description: "Execution Started"
 
+  # Step function
+  MyStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: step-functions/leave-approval-sm.asl.json
+      DefinitionSubstitutions:
+        LeaveApprovalLambdaArn: !GetAtt LeaveApprovalLambda.Arn
+        LeaveApprovalValidatorLambdaArn: !GetAtt LeaveApprovalValidatorLambda.Arn
+      Role: !GetAtt StepFunctionsExecutionRole.Arn
+      Logging:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !Sub "${StepFunctionsLogGroup.Arn}:*"
+
+  # ROLES
+  # api gateway role to access step function
   ApiGatewaySfnRole:
     Type: AWS::IAM::Role
     Properties:
@@ -147,22 +151,54 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "states:StartExecution"
-                Resource: !Ref MyStateMachine
+                Resource: !GetAtt MyStateMachine.Arn
 
-  # log groups
+  # step function role to access lambda, cloudwatch
+  StepFunctionsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "states.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "StepFunctionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt LeaveApprovalLambda.Arn
+                  - !GetAtt LeaveApprovalValidatorLambda.Arn
+
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: "*"
+  
+  # LOG GROUPS
   # step function log group to see logs
   StepFunctionsLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/stepfunctions/${MyStateMachine}
-      RetentionInDays: 14
+      LogGroupName: /aws/stepfunctions/leave-approval-sm
+      RetentionInDays: !Ref RetentionInDays
 
   # api gateway log groups
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/apigateway/${MyApi}
-      RetentionInDays: 14
+      LogGroupName: /aws/apigateway/leave-approval-api
+      RetentionInDays: !Ref RetentionInDays
 
 Outputs:
   LeaveApprovalApi:
