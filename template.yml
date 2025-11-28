@@ -63,6 +63,8 @@ Resources:
             RestApiId: !Ref MyRestApi
             Path: /leave-approval
             Method: post
+            Auth:
+              Authorizer: MyLambdaAuth
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -123,13 +125,18 @@ Resources:
               - states:SendTaskSuccess
               - states:SendTaskFailure
             Resource: "*"
+      Environment:
+        Variables:
+          TOKEN_TABLE: !Ref TokenTable
       Events:
         StepFunctionTriggerApi:
           Type: Api
           Properties:
             RestApiId: !Ref MyRestApi
             Path: /leave-response
-            Method: post
+            Method: get
+            Auth:
+              Authorizer: NONE
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -200,3 +207,6 @@ Outputs:
   LeaveApprovalApi:
     Description: API Gateway endpoint URL for Prod stage for getting leave approval api
     Value: !Sub "https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval"
+  LeaveResponseApi:
+    Description: API Gateway endpoint URL for Prod stage for getting leave response api
+    Value: !Sub "https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-response"
