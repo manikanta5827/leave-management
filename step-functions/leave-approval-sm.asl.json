@@ -7,7 +7,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Arguments": {
-        "FunctionName": "${PurchaseLambdaArn}",
+        "FunctionName": "${LeaveApprovalLambdaArn}",
         "Payload": {
           "TaskToken": "{% $states.context.Task.Token %}",
           "Payload": "{% $states.input %}"
