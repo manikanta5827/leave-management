@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-sfn": "^3.940.0"
+  },
+  "name": "leave-management",
+  "version": "1.0.0",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manikanta5827/leave-management.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manikanta5827/leave-management/issues"
+  },
+  "homepage": "https://github.com/manikanta5827/leave-management#readme",
+  "description": ""
+}
