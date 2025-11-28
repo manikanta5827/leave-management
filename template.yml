@@ -71,6 +71,13 @@ Resources:
     Properties:
       CodeUri: lambda-functions/LeaveApproval
       Handler: app.handler
+      Policies: 
+       - AWSLambdaBasicExecutionRole
+       - DynamoDBCrudPolicy:
+            TableName: !Ref TokenTable
+      Environment:
+        Variables:
+          TOKEN_TABLE: !Ref TokenTable
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -94,6 +101,20 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - app.ts
+
+  # DB
+  # my dynamo db
+  TokenTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Token
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: requestId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: requestId
+          KeyType: HASH
 
   # Api Gateway http api
   MyRestApi:
