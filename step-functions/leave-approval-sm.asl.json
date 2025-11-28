@@ -1,9 +1,9 @@
 {
   "Comment": "Step function",
   "QueryLanguage": "JSONata",
-  "StartAt": "Router",
+  "StartAt": "LeaveApproval",
   "States": {
-    "Router": {
+    "LeaveApproval": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
       "Arguments": {
@@ -14,7 +14,7 @@
           "Context": "{% $states.context %}"
         }
       },
-      "TimeoutSeconds": 60,
+      "TimeoutSeconds": 300,
       "Retry": [
         {
           "ErrorEquals": [
@@ -31,13 +31,62 @@
       ],
       "Catch": [
         {
+          "ErrorEquals": ["ApprovalRejected"],
+          "Next": "FailureLeaveApprovalHandler"
+        },
+        {
           "ErrorEquals": ["States.ALL"],
           "Next": "GenericLambdaErrorHandler"
         }
       ],
+      "Next": "SuccessLeaveApprovalHandler"
+    },
+    "SuccessLeaveApprovalHandler": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Arguments": {
+        "FunctionName": "${SuccessLeaveApprovalLambdaArn}",
+        "Payload": "{% $states.input %}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
       "End": true
     },
-
+    "FailureLeaveApprovalHandler": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Arguments": {
+        "FunctionName": "${FailureLeaveApprovalLambdaArn}",
+        "Payload": "{% $states.input %}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "End": true
+    },
     "GenericLambdaErrorHandler": {
       "Type": "Pass",
       "Output": "{% { \"message\": \"Lambda Flow Failed\" } %}",
