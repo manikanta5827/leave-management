@@ -9,8 +9,6 @@ import { sfnClient } from "../Shared/step-function/client";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  // console.log(event);
-
   const { requestId, status } = event.queryStringParameters as {
     requestId: string;
     status: string;
@@ -18,28 +16,33 @@ export const handler = async (
 
   // fetch token from Token table using requestId
   const data = await Token.get({ requestId });
-  // const token = data.token;
-  console.log(data);
-  console.log(status);
+  const token = data.token;
 
-  // const { taskToken, result } = JSON.parse(event.body as string);
+  if (status == "accept") {
+    const command = new SendTaskSuccessCommand({
+      taskToken: token,
+      output: JSON.stringify({
+        status: "APPROVED",
+        data: "accept",
+      }),
+    });
 
-  // if (!taskToken) {
-  //   throw new Error("Missing taskToken");
-  // }
+    await sfnClient.send(command);
+  } else {
+    const command = new SendTaskFailureCommand({
+      taskToken: token,
+      error: "ApprovalRejected",
+      cause: JSON.stringify({ reason: "Admin rejected the request" }),
+    });
 
-  // const command = new SendTaskSuccessCommand({
-  //   taskToken,
-  //   output: JSON.stringify({
-  //     status: "APPROVED",
-  //     data: result,
-  //   }),
-  // });
-
-  // await sfnClient.send(command);
+    await sfnClient.send(command);
+  }
 
   return {
     statusCode: 200,
-    body: JSON.stringify(event),
+    body: JSON.stringify({
+      message: "Status send",
+      time: new Date().toISOString(),
+    }),
   };
 };
