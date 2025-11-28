@@ -35,8 +35,8 @@ export const handler = async (event: InputPayload): Promise<{}> => {
     ADMIN_EMAIL,
     `user leave request`,
     `user ${username} is requesting for ${noOfDays} days of leave
-    if you want to approve click on this link ${apiUrl}?requestId=${requestId} or
-    if you want to reject click on this link ${apiUrl}?requestId=${requestId}`
+    if you want to approve click on this link ${apiUrl}/leave-response?requestId=${requestId}&status=accept or
+    if you want to reject click on this link ${apiUrl}/leave-response?requestId=${requestId}&status=reject `
   );
   return {};
 };
