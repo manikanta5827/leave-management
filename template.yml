@@ -115,16 +115,11 @@ Resources:
     Properties:
       CodeUri: lambda-functions/StepFunctionResumer
       Handler: app.handler
-      Timeout: 3
+      Timeout: 5
       Policies:
         - AWSLambdaBasicExecutionRole
         - DynamoDBCrudPolicy:
             TableName: !Ref TokenTable
-        - Statement:
-            Effect: Allow
-            Action:
-              - states:StartExecution
-            Resource: !GetAtt MyStateMachine.Arn
         - Statement:
             Effect: Allow
             Action:
@@ -159,9 +154,16 @@ Resources:
       CodeUri: lambda-functions/SuccessLeaveApproval
       Handler: app.handler
       Timeout: 5
-    Environment:
-      Variables:
-        PROJECT_EMAIL: !Ref ProjectEmail
+      Environment:
+        Variables:
+          PROJECT_EMAIL: !Ref ProjectEmail
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:sendEmail
+                - ses:SendRawEmail
+              Resource: "*"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -178,9 +180,16 @@ Resources:
       CodeUri: lambda-functions/FailureLeaveApproval
       Handler: app.handler
       Timeout: 5
-    Environment:
-      Variables:
-        PROJECT_EMAIL: !Ref ProjectEmail
+      Environment:
+        Variables:
+          PROJECT_EMAIL: !Ref ProjectEmail
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:sendEmail
+                - ses:SendRawEmail
+              Resource: "*"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
