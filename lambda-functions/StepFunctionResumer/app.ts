@@ -3,12 +3,24 @@ import {
   SendTaskSuccessCommand,
   SendTaskFailureCommand,
 } from "@aws-sdk/client-sfn";
-import { sfnClient } from "./Config/stepfunction.config";
+import Token from "../Shared/dynamo/tokenModel";
+import { sfnClient } from "../Shared/step-function/client";
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  console.log(event);
+  // console.log(event);
+
+  const { requestId, status } = event.queryStringParameters as {
+    requestId: string;
+    status: string;
+  };
+
+  // fetch token from Token table using requestId
+  const data = await Token.get({ requestId });
+  // const token = data.token;
+  console.log(data);
+  console.log(status);
 
   // const { taskToken, result } = JSON.parse(event.body as string);
 
@@ -28,6 +40,6 @@ export const handler = async (
 
   return {
     statusCode: 200,
-    body: "Step function resumed successfully",
+    body: JSON.stringify(event),
   };
 };
