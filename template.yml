@@ -135,7 +135,7 @@ Resources:
           Properties:
             RestApiId: !Ref MyRestApi
             Path: /leave-response
-            Method: get
+            Method: post
             Auth:
               Authorizer: NONE
     Metadata:
