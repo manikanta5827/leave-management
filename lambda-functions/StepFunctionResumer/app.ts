@@ -27,6 +27,7 @@ export const handler = async (
           status: "APPROVED",
           data: {
             userEmail: userEmail,
+            requestId: requestId,
           },
         }),
       });
@@ -39,6 +40,7 @@ export const handler = async (
         cause: JSON.stringify({
           reason: "Admin rejected the request",
           userEmail,
+          requestId,
         }),
       });
 

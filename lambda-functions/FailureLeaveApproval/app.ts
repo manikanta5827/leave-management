@@ -1,4 +1,5 @@
 import { sendEmail } from "../Shared/ses/email-sender.helper";
+import Token from "../Shared/dynamo/tokenModel";
 
 const PROJECT_EMAIL = process.env.PROJECT_EMAIL;
 
@@ -8,10 +9,13 @@ export const handler = async (event: {
   Error: string;
   Cause: string;
 }): Promise<{}> => {
-  const { userEmail } = JSON.parse(event.Cause) as {
+  const { userEmail, requestId } = JSON.parse(event.Cause) as {
     reason: string;
     userEmail: string;
+    requestId: string;
   };
+
+  await Token.update({ requestId: requestId }, { status: "Failed" });
 
   await sendEmail(
     PROJECT_EMAIL,
