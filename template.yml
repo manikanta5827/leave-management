@@ -26,8 +26,8 @@ Resources:
   AuthLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/Authorizer
-      Handler: app.handler
+      CodeUri: ./
+      Handler: lambda-functions/Authorizer/app.handler
       Timeout: 3
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -41,14 +41,14 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - lambda-functions/Authorizer/app.ts
 
   # Step function trigger lambda
   StepFunctionTriggerLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/StepFunctionExecutor
-      Handler: app.handler
+      CodeUri: ./
+      Handler: lambda-functions/StepFunctionExecutor/app.handler
       Timeout: 3
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -76,14 +76,14 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - lambda-functions/StepFunctionExecutor/app.ts
 
   # Leave approval lambda function
   LeaveApprovalLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/LeaveApproval
-      Handler: app.handler
+      CodeUri: ./
+      Handler: lambda-functions/LeaveApproval/app.handler
       Timeout: 7
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -107,14 +107,14 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - lambda-functions/LeaveApproval/app.ts
 
   # Step function resume lambda
   StepFunctionResumeLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/StepFunctionResumer
-      Handler: app.handler
+      CodeUri: ./
+      Handler: lambda-functions/StepFunctionResumer/app.handler
       Timeout: 5
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -145,14 +145,14 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - lambda-functions/StepFunctionResumer/app.ts
 
   # Success Leave approval lambda function
   SuccessLeaveApprovalLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/SuccessLeaveApproval
-      Handler: app.handler
+      CodeUri: ./
+      Handler: lambda-functions/SuccessLeaveApproval/app.handler
       Timeout: 5
       Environment:
         Variables:
@@ -171,14 +171,14 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - lambda-functions/SuccessLeaveApproval/app.ts
 
   # Success Leave approval lambda function
   FailureLeaveApprovalLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda-functions/FailureLeaveApproval
-      Handler: app.handler
+      CodeUri: ./
+      Handler: lambda-functions/FailureLeaveApproval/app.handler
       Timeout: 5
       Environment:
         Variables:
@@ -197,7 +197,7 @@ Resources:
         Target: es2020
         Sourcemap: true
         EntryPoints:
-          - app.ts
+          - lambda-functions/FailureLeaveApproval/app.ts
 
   # DB
   # my dynamo db
