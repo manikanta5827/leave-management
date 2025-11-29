@@ -10,27 +10,30 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            -   name: Checkout source
-                uses: actions/checkout@v3
+            - name: Checkout source
+              uses: actions/checkout@v3
 
-            -   name: Set up Node
-                uses: actions/setup-node@v3
-                with:
-                    node-version: "22"
+            - name: Set up Node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "22"
 
-            -   name: Install SAM CLI
-                run: |
-                    pip install aws-sam-cli
+            - name: Install esbuild
+              run: npm install -g esbuild
 
-            -   name: Configure AWS Credentials
-                uses: aws-actions/configure-aws-credentials@v4
-                with:
-                    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                    aws-region: ${{ secrets.AWS_REGION }}
+            - name: Install SAM CLI
+              run: |
+                  pip install aws-sam-cli
 
-            -   name: SAM build
-                run: sam build
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION }}
 
-            -   name: sam deploy
-                run: sam deploy --no-confirm-changeset
+            - name: SAM build
+              run: sam build
+
+            - name: sam deploy
+              run: sam deploy --no-confirm-changeset
