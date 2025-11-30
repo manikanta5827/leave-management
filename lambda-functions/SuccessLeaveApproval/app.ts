@@ -1,5 +1,5 @@
 import Token from "../Shared/dynamo/models/tokenModel";
-import { sendEmail } from "../Shared/ses/helper/email-sender.helper";
+import { sendEmail } from "../Shared/ses/helper/email-sender";
 
 const PROJECT_EMAIL = process.env.PROJECT_EMAIL;
 

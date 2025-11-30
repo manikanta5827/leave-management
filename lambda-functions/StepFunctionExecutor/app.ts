@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { startStepFunctionExecution } from "./helper/sfn-execution.helper";
+import { startStepFunctionExecution } from "./helper/sfn-execution";
 import { InputPayload } from "./@types/input-request.types";
 
 const STATE_MACHINE_ARN = process.env.STATE_MACHINE_ARN;
