@@ -3,6 +3,10 @@ import {
   APIGatewayAuthorizerResult,
 } from "aws-lambda";
 
+let SECRET: string | undefined = process.env.SECRET;
+
+if (!SECRET) throw new Error("secret is not passed in env");
+
 export const handler = async (
   event: APIGatewayTokenAuthorizerEvent
 ): Promise<APIGatewayAuthorizerResult> => {
@@ -10,7 +14,7 @@ export const handler = async (
 
   const token = event.authorizationToken.replace("Bearer ", "");
 
-  if (token === process.env.SECRET) {
+  if (token === SECRET) {
     return {
       principalId: "user",
       policyDocument: {
