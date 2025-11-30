@@ -12,6 +12,7 @@ export const handler = async (event: InputPayload): Promise<{}> => {
     store the token in db so that when admin accept responds back,
     that trigger lambda can fetch the token and resume the execution
   */
+  console.log("event::", event);
   const token = event.TaskToken;
   const apiUrl = event.Payload.apiUrl;
   const userEmail = event.Payload.email;

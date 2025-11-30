@@ -9,6 +9,7 @@ export const handler = async (event: {
   Error: string;
   Cause: string;
 }): Promise<{}> => {
+  console.log("event::", event);
   const { userEmail, requestId } = JSON.parse(event.Cause) as {
     reason: string;
     userEmail: string;

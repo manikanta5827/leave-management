@@ -12,6 +12,7 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     let body = JSON.parse(event.body as string);
+    console.log("body", body);
     body.apiUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
 
     const { email, username, noOfDays, reason } = body as InputPayload;
