@@ -221,11 +221,8 @@ Resources:
       Auth:
         DefaultAuthorizer: MyLambdaAuth
         Authorizers:
-          MyLambdaAuth:
-            FunctionArn: !GetAtt AuthLambda.Arn
-            Identity:
-              ReauthorizeEvery: 0
-
+                  MyLambdaAuth:
+                    FunctionArn: !GetAtt AuthLambda.Arn
   # Step function
   MyStateMachine:
     Type: AWS::Serverless::StateMachine
