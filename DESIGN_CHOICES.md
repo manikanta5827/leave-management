@@ -21,6 +21,14 @@ A core requirement is to notify an administrator via email when a leave request 
 ### Solution
 To avoid tight coupling and ensure future extensibility, a dedicated Lambda function (`LeaveApprovalLambda`) was created to act as a generic "messaging service." The Step Function's only responsibility is to invoke this Lambda, passing it the necessary data. The Lambda function, in turn, contains the specific logic for sending the notification (currently, via SES). This abstracts the notification logic out of the workflow orchestration, promoting a clean separation of concerns. If new notification channels are needed, only the Lambda function's code needs to be updated; the Step Function state machine remains unchanged.
 
+## 3. HTTP Method Selection for `/leave-approval` API
+
+### Problem
+When initially designing the `/leave-approval` API endpoint, the choice of HTTP method evolved through several considerations. Initially, a `GET` method seemed plausible due to the absence of a request body and the use of query parameters for data. However, the operation's nature, involving data submission to the backend, suggested `POST` was more appropriate. Further reflection revealed that the API was not merely creating new data but rather updating existing leave request statuses, leading to the consideration of `PUT`.
+
+### Solution
+The final decision was to use the `PATCH` HTTP method for the `/leave-approval` API. This choice was made because the operation involves updating only specific fields of an existing resource (a leave request, by changing its status), rather than replacing the entire resource. `PATCH` semantically represents a partial modification, which accurately describes the API's function. This evolution from `GET` to `POST`, then `PUT`, and finally `PATCH` reflects a careful consideration of RESTful principles and the precise nature of the data manipulation involved.
+
 ## Potential Future Improvements
 - **Extend Notification Service:** Enhance `LeaveApprovalLambda` to support multiple notification channels (e.g., SMS, push notifications) based on user preferences.
 - **Advanced Request Validation:** Implement more robust input validation within `StepFunctionTriggerLambda` to ensure data integrity before Step Function execution.
