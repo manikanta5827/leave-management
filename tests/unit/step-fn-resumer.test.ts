@@ -24,8 +24,6 @@ jest.mock("../../lambda-functions/Shared/dynamo/models/tokenModel", () => ({
   __esModule: true,
   default: {
     get: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
   },
 }));
 
