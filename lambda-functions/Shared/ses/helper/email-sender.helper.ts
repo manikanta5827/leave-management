@@ -1,5 +1,5 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
-import { sesClient } from "./client";
+import { sesClient } from "../config/client";
 
 export async function sendEmail(
   sender: string,
@@ -7,7 +7,7 @@ export async function sendEmail(
   subject: string,
   body: string
 ): Promise<void> {
-  console.log(`sender:: ${sender}, receiver:: ${receiver}`)
+  console.log(`sender:: ${sender}, receiver:: ${receiver}`);
   const params = {
     Source: sender,
     Destination: {

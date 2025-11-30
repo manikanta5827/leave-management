@@ -1,6 +1,6 @@
-import Token from "../Shared/dynamo/tokenModel";
-import { sendEmail } from "../Shared/ses/email-sender.helper";
-import { InputPayload } from "./Types/input-request.types";
+import Token from "../Shared/dynamo/models/tokenModel";
+import { sendEmail } from "../Shared/ses/helper/email-sender.helper";
+import { InputPayload } from "./@types/input-request.types";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const PROJECT_EMAIL = process.env.PROJECT_EMAIL;

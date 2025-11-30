@@ -3,8 +3,8 @@ import {
   SendTaskSuccessCommand,
   SendTaskFailureCommand,
 } from "@aws-sdk/client-sfn";
-import Token from "../Shared/dynamo/tokenModel";
-import { sfnClient } from "../Shared/step-function/client";
+import Token from "../Shared/dynamo/models/tokenModel";
+import { sfnClient } from "../Shared/step-function/config/client";
 
 export const handler = async (
   event: APIGatewayProxyEvent
