@@ -1,39 +1,45 @@
 name: Deploy sam app
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout source
-              uses: actions/checkout@v3
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-            - name: Set up Node
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "22"
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
 
-            - name: Install esbuild
-              run: npm install -g esbuild
+      - name: Install esbuild
+        run: npm install -g esbuild
 
-            - name: Install SAM CLI
-              run: |
-                  pip install aws-sam-cli
+      - name: Install SAM CLI
+        run: |
+          pip install aws-sam-cli
 
-            - name: Configure AWS Credentials
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-            - name: SAM build
-              run: sam build
+      - name: Install dependencies
+        run: npm install
 
-            - name: sam deploy
-              run: sam deploy --no-confirm-changeset
+      - name: Run Tests
+        run: npm test
+
+      - name: SAM build
+        run: sam build
+
+      - name: sam deploy
+        run: sam deploy --no-confirm-changeset
