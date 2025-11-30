@@ -34,6 +34,14 @@ export const handler = async (
       });
 
       await sfnClient.send(command);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Approval Status send",
+          time: new Date().toISOString(),
+        }),
+      };
     } else {
       const command = new SendTaskFailureCommand({
         taskToken: token,
@@ -46,14 +54,15 @@ export const handler = async (
       });
 
       await sfnClient.send(command);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Reject Status send",
+          time: new Date().toISOString(),
+        }),
+      };
     }
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: "Status send",
-        time: new Date().toISOString(),
-      }),
-    };
   } catch (error) {
     console.log(error);
     const errorName =
