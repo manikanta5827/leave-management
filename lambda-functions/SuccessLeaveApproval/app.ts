@@ -8,7 +8,7 @@ if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passed in env");
 export const handler = async (event: {
   status: string;
   data: { userEmail: string; requestId: string };
-}): Promise<{}> => {
+}): Promise<{ status: string; message: string }> => {
   console.log(event);
   const userEmail = event.data.userEmail;
   const requestId = event.data.requestId;
@@ -20,5 +20,8 @@ export const handler = async (event: {
     `Leave Approval Status`,
     `Leave approval is Accepted, enjoy..:)`
   );
-  return {};
+  return {
+    status: "success",
+    message: "Success Leave approval send",
+  };
 };

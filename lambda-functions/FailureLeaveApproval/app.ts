@@ -8,7 +8,7 @@ if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passes in env");
 export const handler = async (event: {
   Error: string;
   Cause: string;
-}): Promise<{}> => {
+}): Promise<{ status: string; message: string }> => {
   console.log(event);
   const { userEmail, requestId } = JSON.parse(event.Cause) as {
     reason: string;
@@ -24,5 +24,8 @@ export const handler = async (event: {
     `Leave Approval Status`,
     `Leave approval is Rejected, Better luck next Time..:)`
   );
-  return {};
+  return {
+    status: "success",
+    message: "Failure Leave approval send",
+  };
 };

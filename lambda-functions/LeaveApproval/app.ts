@@ -7,7 +7,9 @@ const PROJECT_EMAIL = process.env.PROJECT_EMAIL;
 
 if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL is not passes in env");
 if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passes in env");
-export const handler = async (event: InputPayload): Promise<{}> => {
+export const handler = async (
+  event: InputPayload
+): Promise<{ status: string }> => {
   /* 
     store the token in db so that when admin accept responds back,
     that trigger lambda can fetch the token and resume the execution
