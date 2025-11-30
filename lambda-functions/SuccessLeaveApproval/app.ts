@@ -9,7 +9,7 @@ export const handler = async (event: {
   status: string;
   data: { userEmail: string; requestId: string };
 }): Promise<{}> => {
-  console.log("event::", event);
+  console.log(event);
   const userEmail = event.data.userEmail;
   const requestId = event.data.requestId;
 

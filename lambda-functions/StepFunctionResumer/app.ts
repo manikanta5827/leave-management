@@ -10,7 +10,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log("event::", event);
+    console.log(JSON.stringify(event));
     const { requestId, status } = event.queryStringParameters as {
       requestId: string;
       status: string;
