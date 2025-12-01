@@ -17,6 +17,7 @@ export const getSecret = async (
           SecretId: secret_name,
         })
       );
+      console.log(response);
       // if secret is defined then store it in cache
       if (response.SecretString) {
         let secret = JSON.parse(response.SecretString) as {
