@@ -7,6 +7,8 @@ export const getSecret = async (
   secret_key: string
 ): Promise<string> => {
   try {
+    console.log(`secret_name :: ${secret_name}`);
+    console.log(`secrer_key :: ${secret_key}`);
     // get the secret from cache
     let secret = cache.get(secret_name);
 
