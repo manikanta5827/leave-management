@@ -29,14 +29,16 @@ describe("failure leave approval lambda Test", () => {
     });
 
     // mock secrets manager
-    (getSecret as jest.Mock).mockImplementation(async (secret_key: string) => {
-      switch (secret_key) {
-        case "PROJECT_EMAIL":
-          return "thummurimanikanta7@gmail.com";
-        default:
-          throw new Error(`${secret_key} :: secret_key is not valid`);
+    (getSecret as jest.Mock).mockImplementation(
+      async (secret_name: string, secret_key: string) => {
+        switch (secret_key) {
+          case "PROJECT_EMAIL":
+            return "thummurimanikanta7@gmail.com";
+          default:
+            throw new Error(`${secret_key} :: secret_key is not valid`);
+        }
       }
-    });
+    );
 
     let event = {
       Error: "Test error",
