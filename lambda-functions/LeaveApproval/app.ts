@@ -16,7 +16,9 @@ export const handler = async (
   event: InputPayload
 ): Promise<{ status: string }> => {
   await loadSecrets();
-
+  console.log(
+    `ADMIN EMIAL :: ${ADMIN_EMAIL} , PROJECT_EMAIL :: ${PROJECT_EMAIL}`
+  );
   if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL secret is missing");
   if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL secret is missing");
 
