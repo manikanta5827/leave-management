@@ -157,6 +157,8 @@ Resources:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TokenTable
         - Statement:
             - Effect: Allow
               Action:
@@ -188,6 +190,8 @@ Resources:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
       Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TokenTable
         - Statement:
             - Effect: Allow
               Action:
