@@ -22,14 +22,15 @@ export const getSecret = async (
       console.log(response);
       // if secret is defined then store it in cache
       if (response.SecretString) {
-        let secret = JSON.parse(response.SecretString) as {
-          secret_key: string;
-        };
+        let secret = JSON.parse(response.SecretString) as Record<
+          string,
+          string
+        >;
 
         console.log(secret);
-        console.log(secret.secret_key);
-        cache.set(secret_name, secret.secret_key);
-        return secret.secret_key;
+        const value = secret[secret_key];
+        cache.set(secret_name, value);
+        return value;
       }
       throw new Error(`${secret_key} not found`);
     }
