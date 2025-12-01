@@ -26,6 +26,8 @@ export const getSecret = async (
           secret_key: string;
         };
 
+        console.log(secret);
+        console.log(secret.secret_key);
         cache.set(secret_name, secret.secret_key);
         return secret.secret_key;
       }
