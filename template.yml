@@ -85,6 +85,11 @@ Resources:
                 - ses:sendEmail
                 - ses:SendRawEmail
               Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeTable
+              Resource: !GetAtt TokenTable.Arn
       Environment:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
@@ -115,6 +120,11 @@ Resources:
               - states:SendTaskSuccess
               - states:SendTaskFailure
             Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeTable
+              Resource: !GetAtt TokenTable.Arn
       Environment:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
@@ -153,6 +163,11 @@ Resources:
                 - ses:sendEmail
                 - ses:SendRawEmail
               Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeTable
+              Resource: !GetAtt TokenTable.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -179,6 +194,11 @@ Resources:
                 - ses:sendEmail
                 - ses:SendRawEmail
               Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeTable
+              Resource: !GetAtt TokenTable.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
