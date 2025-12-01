@@ -1,14 +1,22 @@
 import { sendEmail } from "../Shared/ses/helper/email-sender";
 import Token from "../Shared/dynamo/models/tokenModel";
+import { getSecret } from "../Shared/secrets-manager/helper/secrets-getter";
 
-const PROJECT_EMAIL = process.env.PROJECT_EMAIL;
+let PROJECT_EMAIL: string;
 
-if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passes in env");
+async function loadSecrets() {
+  if (!PROJECT_EMAIL) PROJECT_EMAIL = await getSecret("PROJECT_EMAIL");
+}
 
 export const handler = async (event: {
   Error: string;
   Cause: string;
 }): Promise<{ status: string; message: string }> => {
+  // load secrets
+  await loadSecrets();
+
+  if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passes in env");
+
   console.log(event);
   const { userEmail, requestId } = JSON.parse(event.Cause) as {
     reason: string;

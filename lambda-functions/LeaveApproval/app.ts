@@ -1,15 +1,25 @@
 import Token from "../Shared/dynamo/models/tokenModel";
 import { sendEmail } from "../Shared/ses/helper/email-sender";
 import { InputPayload } from "./@types/input-request.types";
+import { getSecret } from "../Shared/secrets-manager/helper/secrets-getter";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const PROJECT_EMAIL = process.env.PROJECT_EMAIL;
+let ADMIN_EMAIL: string;
+let PROJECT_EMAIL: string;
 
-if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL is not passes in env");
-if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passes in env");
+async function loadSecrets() {
+  if (!ADMIN_EMAIL) ADMIN_EMAIL = await getSecret("ADMIN_EMAIL");
+  if (!PROJECT_EMAIL) PROJECT_EMAIL = await getSecret("PROJECT_EMAIL");
+}
+
 export const handler = async (
   event: InputPayload
 ): Promise<{ status: string }> => {
+
+  await loadSecrets();
+
+  if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL secret is missing");
+  if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL secret is missing");
+
   /* 
     store the token in db so that when admin accept responds back,
     that trigger lambda can fetch the token and resume the execution
