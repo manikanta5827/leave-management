@@ -10,16 +10,6 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 
-Parameters:
-  AdminEmail:
-    Type: String
-    Description: Admin email to send leave approval
-    Default: postbox5827@gmail.com
-  ProjectEmail:
-    Type: String
-    Description: Project email to send for all requests
-    Default: thummurimanikanta7@gmail.com
-
 Resources:
   # LAMBDA FUNCTIONS
   # Auth lambda function
@@ -98,8 +88,7 @@ Resources:
       Environment:
         Variables:
           TOKEN_TABLE: !Ref TokenTable
-          ADMIN_EMAIL: !Ref AdminEmail
-          PROJECT_EMAIL: !Ref ProjectEmail
+
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -154,9 +143,6 @@ Resources:
       CodeUri: ./
       Handler: lambda-functions/SuccessLeaveApproval/app.handler
       Timeout: 5
-      Environment:
-        Variables:
-          PROJECT_EMAIL: !Ref ProjectEmail
       Policies:
         - Statement:
             - Effect: Allow
@@ -180,9 +166,6 @@ Resources:
       CodeUri: ./
       Handler: lambda-functions/FailureLeaveApproval/app.handler
       Timeout: 5
-      Environment:
-        Variables:
-          PROJECT_EMAIL: !Ref ProjectEmail
       Policies:
         - Statement:
             - Effect: Allow
