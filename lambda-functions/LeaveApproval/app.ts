@@ -7,14 +7,14 @@ let ADMIN_EMAIL: string;
 let PROJECT_EMAIL: string;
 
 async function loadSecrets() {
-  if (!ADMIN_EMAIL) ADMIN_EMAIL = await getSecret("ADMIN_EMAIL");
-  if (!PROJECT_EMAIL) PROJECT_EMAIL = await getSecret("PROJECT_EMAIL");
+  if (!ADMIN_EMAIL) ADMIN_EMAIL = await getSecret("admin_email", "ADMIN_EMAIL");
+  if (!PROJECT_EMAIL)
+    PROJECT_EMAIL = await getSecret("project_email", "PROJECT_EMAIL");
 }
 
 export const handler = async (
   event: InputPayload
 ): Promise<{ status: string }> => {
-
   await loadSecrets();
 
   if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL secret is missing");

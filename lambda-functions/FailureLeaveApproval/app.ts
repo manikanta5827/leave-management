@@ -5,7 +5,8 @@ import { getSecret } from "../Shared/secrets-manager/helper/secrets-getter";
 let PROJECT_EMAIL: string;
 
 async function loadSecrets() {
-  if (!PROJECT_EMAIL) PROJECT_EMAIL = await getSecret("PROJECT_EMAIL");
+  if (!PROJECT_EMAIL)
+    PROJECT_EMAIL = await getSecret("project_email", "PROJECT_EMAIL");
 }
 
 export const handler = async (event: {

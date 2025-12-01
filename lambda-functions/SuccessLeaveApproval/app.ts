@@ -5,7 +5,8 @@ import { getSecret } from "../Shared/secrets-manager/helper/secrets-getter";
 let PROJECT_EMAIL: string;
 
 async function loadSecrets() {
-  if (!PROJECT_EMAIL) PROJECT_EMAIL = await getSecret("PROJECT_EMAIL");
+  if (!PROJECT_EMAIL)
+    PROJECT_EMAIL = await getSecret("project_email", "PROJECT_EMAIL");
 }
 
 export const handler = async (event: {
@@ -14,7 +15,7 @@ export const handler = async (event: {
 }): Promise<{ status: string; message: string }> => {
   // load secrets
   await loadSecrets();
-  
+
   if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL is not passed in env");
 
   console.log(event);
