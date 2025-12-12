@@ -12,7 +12,9 @@
   "scripts": {
     "unit": "jest",
     "compile": "tsc",
-    "test": "npm run compile && npm run unit"
+    "test": "npm run compile && npm run unit",
+    "build": "sam build",
+    "deploy": "sam deploy"
   },
   "repository": {
     "type": "git",
