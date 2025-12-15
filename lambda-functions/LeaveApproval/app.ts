@@ -6,19 +6,23 @@ import { getSecret } from "../Shared/secrets-manager/helper/secrets-getter";
 let ADMIN_EMAIL: string;
 let PROJECT_EMAIL: string;
 
+const secretsPromise = loadSecrets();
+
 async function loadSecrets() {
-  if (!ADMIN_EMAIL) ADMIN_EMAIL = await getSecret("admin_email", "ADMIN_EMAIL");
-  if (!PROJECT_EMAIL)
-    PROJECT_EMAIL = await getSecret("project_email", "PROJECT_EMAIL");
+  const [adminEmail, projectEmail] = await Promise.all([
+    getSecret("admin_email", "ADMIN_EMAIL"),
+    getSecret("project_email", "PROJECT_EMAIL"),
+  ]);
+  ADMIN_EMAIL = adminEmail;
+  PROJECT_EMAIL = projectEmail;
 }
 
 export const handler = async (
   event: InputPayload
 ): Promise<{ status: string }> => {
-  await loadSecrets();
-  console.log(
-    `ADMIN EMAIL :: ${ADMIN_EMAIL} , PROJECT_EMAIL :: ${PROJECT_EMAIL}`
-  );
+
+  await secretsPromise;
+
   if (!ADMIN_EMAIL) throw new Error("ADMIN_EMAIL secret is missing");
   if (!PROJECT_EMAIL) throw new Error("PROJECT_EMAIL secret is missing");
 

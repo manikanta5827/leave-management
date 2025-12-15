@@ -3,7 +3,7 @@ import {
   APIGatewayAuthorizerResult,
 } from "aws-lambda";
 
-let SECRET: string | undefined = process.env.SECRET;
+const SECRET: string | undefined = process.env.SECRET;
 
 if (!SECRET) throw new Error("secret is not passed in env");
 
