@@ -18,8 +18,8 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install esbuild
-        run: npm install -g esbuild
+      # - name: Install esbuild
+      #   run: npm install -g esbuild
 
       - name: Install SAM CLI
         run: |
