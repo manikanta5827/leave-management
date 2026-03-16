@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Sam Template for Leave Management project
 
@@ -23,7 +23,7 @@ Resources:
         - AWSLambdaBasicExecutionRole
       Environment:
         Variables:
-          SECRET: "somesecret"
+          SECRET: somesecret
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -84,7 +84,7 @@ Resources:
               Action:
                 - ses:sendEmail
                 - ses:SendRawEmail
-              Resource: "*"
+              Resource: '*'
         - Statement:
             - Effect: Allow
               Action:
@@ -119,7 +119,7 @@ Resources:
             Action:
               - states:SendTaskSuccess
               - states:SendTaskFailure
-            Resource: "*"
+            Resource: '*'
         - Statement:
             - Effect: Allow
               Action:
@@ -164,7 +164,7 @@ Resources:
               Action:
                 - ses:sendEmail
                 - ses:SendRawEmail
-              Resource: "*"
+              Resource: '*'
         - Statement:
             - Effect: Allow
               Action:
@@ -197,7 +197,7 @@ Resources:
               Action:
                 - ses:sendEmail
                 - ses:SendRawEmail
-              Resource: "*"
+              Resource: '*'
         - Statement:
             - Effect: Allow
               Action:
@@ -240,7 +240,6 @@ Resources:
   MyStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
-      DefinitionUri: step-functions/leave-approval-sm.asl.json
       DefinitionSubstitutions:
         LeaveApprovalLambdaArn: !GetAtt LeaveApprovalLambda.Arn
         SuccessLeaveApprovalLambdaArn: !GetAtt SuccessLeaveApprovalLambda.Arn
@@ -252,8 +251,9 @@ Resources:
             FunctionName: !Ref SuccessLeaveApprovalLambda
         - LambdaInvokePolicy:
             FunctionName: !Ref FailureLeaveApprovalLambda
+      DefinitionUri: step-functions/leave-approval-sm.asl.json
 
 Outputs:
   LeaveApprovalApi:
     Description: API Gateway endpoint URL for Prod stage for getting leave approval api
-    Value: !Sub "https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval"
+    Value: !Sub https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/leave-approval
